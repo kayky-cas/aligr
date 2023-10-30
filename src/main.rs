@@ -1,16 +1,16 @@
-use std::io::stdin;
+use std::{io::stdin, process::exit};
 
 fn main() {
-    let align_word = std::env::args()
-        .nth(1)
-        .expect("Please provide an alignment word");
+    let align_word = std::env::args().nth(1).unwrap_or_else(|| {
+        eprintln!("Please provide an alignment word!");
+        exit(1);
+    });
 
     let lines: Vec<String> = stdin().lines().flatten().collect();
 
     let max_align = lines
         .iter()
-        .map(|l| l.split_once(&align_word))
-        .flatten()
+        .filter_map(|l| l.split_once(&align_word))
         .map(|(l, _)| l.len())
         .max()
         .unwrap_or(0);
