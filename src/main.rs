@@ -1,4 +1,7 @@
-use std::{io::stdin, process::exit};
+use std::{
+    io::{stdin, Write},
+    process::exit,
+};
 
 fn main() {
     let align_word = std::env::args().nth(1).unwrap_or_else(|| {
@@ -15,11 +18,23 @@ fn main() {
         .max()
         .unwrap_or(0);
 
+    let mut stdout = std::io::stdout().lock();
+
     for line in lines {
-        if let Some((left, right)) = line.split_once(&align_word) {
-            println!("{:<width$}{}{}", left, align_word, right, width = max_align);
-        } else {
-            println!("{}", line)
+        match line.split_once(&align_word) {
+            Some((left, right)) => writeln!(
+                stdout,
+                "{:<width$}{}{}",
+                left,
+                align_word,
+                right,
+                width = max_align
+            ),
+            None => writeln!(stdout, "{}", line),
         }
+        .unwrap_or_else(|err| {
+            eprintln!("Error writing to stdout: {}", err);
+            exit(1);
+        })
     }
 }
