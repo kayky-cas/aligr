@@ -15,15 +15,13 @@ fn main() {
         exit(1);
     });
 
-    let lines: Vec<String> = stdin().lines().flatten().collect();
-
     let mut max_align = 0;
-    let mut lines_split = Vec::with_capacity(lines.len());
+    let mut lines_split = Vec::new();
 
-    for pair in lines
-        .iter()
-        .map(|l| l.split_once(&align_word).unwrap_or_else(|| (l, "")))
-    {
+    for pair in stdin().lines().flatten().map(|l| {
+        let l = String::leak(l);
+        l.split_once(&align_word).unwrap_or_else(|| (l, ""))
+    }) {
         if pair.0.len() > max_align {
             max_align = pair.0.len();
         }
