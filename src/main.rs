@@ -17,27 +17,31 @@ fn main() {
 
     let lines: Vec<String> = stdin().lines().flatten().collect();
 
-    let max_align = lines
+    let mut max_align = 0;
+    let mut lines_split = Vec::with_capacity(lines.len());
+
+    for pair in lines
         .iter()
-        .filter_map(|l| l.split_once(&align_word))
-        .map(|(l, _)| l.len())
-        .max()
-        .unwrap_or(0);
+        .map(|l| l.split_once(&align_word).unwrap_or_else(|| (l, "")))
+    {
+        if pair.0.len() > max_align {
+            max_align = pair.0.len();
+        }
+
+        lines_split.push(pair);
+    }
 
     let mut stdout = stdout().lock();
 
-    for line in lines {
-        match line.split_once(&align_word) {
-            Some((left, right)) => writeln!(
-                stdout,
-                "{:<width$}{}{}",
-                left,
-                align_word,
-                right,
-                width = max_align
-            ),
-            None => writeln!(stdout, "{}", line),
-        }
+    for (left, right) in lines_split {
+        writeln!(
+            stdout,
+            "{:<width$}{}{}",
+            left,
+            align_word,
+            right,
+            width = max_align
+        )
         .unwrap_or_else(|err| {
             eprintln!("Error writing to stdout: {}", err);
             exit(1);
