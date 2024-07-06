@@ -14,20 +14,25 @@ fn main() {
         eprintln!("Usage: {} <word>", program_name);
         exit(1);
     });
-
     let mut max_align = 0;
     let mut lines_split = Vec::new();
 
-    for pair in stdin().lines().flatten().map(|l| {
-        let l = String::leak(l);
-        l.split_once(&align_word).unwrap_or_else(|| (l, ""))
-    }) {
-        if pair.0.len() > max_align {
-            max_align = pair.0.len();
-        }
+    stdin()
+        .lines()
+        // this expression returning a `std::io::Lines`
+        // may produce an infinite number of `Err` in case of a read error
+        .map_while(Result::ok)
+        .map(|l| {
+            let l = String::leak(l);
+            l.split_once(&align_word).unwrap_or((l, ""))
+        })
+        .for_each(|pair| {
+            if pair.0.len() > max_align {
+                max_align = pair.0.len();
+            }
 
-        lines_split.push(pair);
-    }
+            lines_split.push(pair);
+        });
 
     let mut stdout = stdout().lock();
 
